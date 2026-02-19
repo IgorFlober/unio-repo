@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>UNIO</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #efe6de);
+            --text-color: #750608;
+            --hint-color: var(--tg-theme-hint-color, #9a9a9a);
+            --link-color: #750608;
+            --button-color: #750608;
+            --button-text-color: #ffffff;
+            --secondary-bg-color: var(--tg-theme-secondary-bg-color, #ffffff);
+            --accent-color: #750608;
+            --accent-light: #ffcdd2;
+            --border-radius: 16px;
+            --spacing: 16px;
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: var(--spacing);
+        }
+
+        h1, h2, h3 {
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .card {
+            background-color: var(--secondary-bg-color);
+            border-radius: var(--border-radius);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(117, 6, 8, 0.1);
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.1s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-color);
+        }
+
+        .trainer-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .trainer-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: var(--hint-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .trainer-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .trainer-info {
+            flex: 1;
+        }
+
+        .trainer-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--text-color);
+        }
+
+        .trainer-specialty {
+            color: var(--hint-color);
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .trainer-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .star-filled {
+            color: #750608;
+        }
+
+        .star-empty {
+            color: var(--hint-color);
+        }
+
+        .my-bookings-btn {
+            background: transparent;
+            border: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 1rem;
+            color: var(--text-color);
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+            display: inline-block;
+            width: auto;
+        }
+
+        .sub-header {
+            color: var(--hint-color);
+            font-size: 0.9rem;
+            margin: 0.5rem 0 1rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--hint-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            background-color: var(--secondary-bg-color);
+            color: var(--text-color);
+            margin: 1rem 0;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-avatar {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            background-color: var(--hint-color);
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            overflow: hidden;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--text-color);
+        }
+
+        .profile-specialty {
+            color: var(--hint-color);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .rating-summary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .rating-average {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 0.25rem;
+            font-size: 1.2rem;
+        }
+
+        .rating-count {
+            color: var(--hint-color);
+            font-size: 0.9rem;
+        }
+
+        .profile-description {
+            background-color: var(--secondary-bg-color);
+            border-radius: var(--border-radius);
+            padding: 1.25rem;
+            margin: 1.5rem 0 0;
+            text-align: left;
+            white-space: pre-line;
+            color: var(--text-color);
+        }
+
+        .reviews-section {
+            margin-top: 1rem;
+        }
+
+        .review-item {
+            background-color: var(--secondary-bg-color);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .review-author {
+            font-weight: 600;
+        }
+
+        .review-date {
+            color: var(--hint-color);
+            font-size: 0.8rem;
+        }
+
+        .review-rating {
+            margin-bottom: 0.5rem;
+        }
+
+        .review-text {
+            font-size: 0.95rem;
+        }
+
+        .btn {
+            background-color: var(--button-color);
+            color: var(--button-text-color);
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.2s;
+            text-align: center;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--button-color);
+            color: var(--button-color);
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn:hover, .btn-outline:hover {
+            opacity: 0.9;
+        }
+
+        .calendar-container {
+            background-color: var(--secondary-bg-color);
+            border-radius: var(--border-radius);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .calendar-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--hint-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+
+        .time-slots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .time-slot {
+            background-color: var(--bg-color);
+            border: 1px solid var(--hint-color);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-color);
+        }
+
+        .time-slot:hover {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--hint-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .booking-item {
+            background-color: var(--secondary-bg-color);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid var(--accent-color);
+            color: var(--text-color);
+        }
+
+        .booking-item.cancelled {
+            border-left-color: var(--hint-color);
+            opacity: 0.7;
+        }
+
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .booking-trainer {
+            font-weight: 600;
+        }
+
+        .booking-status {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            background-color: var(--accent-light);
+            color: var(--accent-color);
+        }
+
+        .booking-status.cancelled {
+            background-color: #f0f0f0;
+            color: var(--hint-color);
+        }
+
+        .booking-datetime {
+            color: var(--hint-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .cancel-btn {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .share-btn {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background-color: var(--accent-color);
+            color: white;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(117,6,8,0.3);
+            cursor: pointer;
+            border: none;
+        }
+
+        .loading, .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--hint-color);
+        }
+
+        .back-button {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            width: 40px;
+            height: 40px;
+            background-color: var(--secondary-bg-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--text-color);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 100;
+            border: none;
+            transition: opacity 0.2s;
+        }
+        .back-button:hover {
+            opacity: 0.8;
+        }
+        .back-button.hidden {
+            display: none;
+        }
+
+        .book-btn-large {
+            background-color: var(--button-color);
+            color: var(--button-text-color);
+            border: none;
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            width: 100%;
+            margin: 1.5rem 0;
+            transition: opacity 0.2s;
+        }
+        .book-btn-large:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <button class="back-button hidden" id="backBtn" onclick="goBack()">←</button>
+        <!-- сюда будет рендериться контент -->
+    </div>
+    <button class="share-btn" id="shareBtn" style="display: none;" onclick="shareTrainer()">🔗</button>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        const userId = tg.initDataUnsafe?.user?.id;
+        const API_URL = 'http://localhost:5000/api';
+
+        let state = {
+            currentView: 'trainers',
+            trainers: [],
+            selectedTrainer: null,
+            selectedDate: '',
+            selectedTime: '',
+            clientName: '',
+            clientPhone: '',
+            currentSlots: [],
+            myBookings: [],
+            reviews: [],
+            searchQuery: ''
+        };
+
+        // ---------- helper ----------
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        // ---------- api calls ----------
+        async function loadTrainers(search = '') {
+            try {
+                const url = search ? `${API_URL}/trainers?search=${encodeURIComponent(search)}` : `${API_URL}/trainers`;
+                const res = await fetch(url);
+                const data = await res.json();
+                state.trainers = Array.isArray(data) ? data : [];
+                render();
+            } catch (e) {
+                console.error('loadTrainers error:', e);
+                showError('Не удалось загрузить тренеров');
+            }
+        }
+
+        async function loadTrainerProfile(trainerId) {
+            try {
+                const res = await fetch(`${API_URL}/trainers/${trainerId}`);
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(`HTTP ${res.status}: ${errText}`);
+                }
+                const trainerData = await res.json();
+                console.log('Данные тренера:', trainerData);
+                state.selectedTrainer = trainerData;
+
+                const revRes = await fetch(`${API_URL}/reviews/${trainerId}`);
+                const reviewsData = await revRes.json();
+                state.reviews = Array.isArray(reviewsData) ? reviewsData : [];
+
+                state.currentView = 'trainerDetail';
+                render();
+            } catch (e) {
+                console.error('loadTrainerProfile error:', e);
+                showError('Не удалось загрузить профиль: ' + e.message);
+            }
+        }
+
+        async function loadSchedule(trainerId, date) {
+            try {
+                const res = await fetch(`${API_URL}/schedule/${trainerId}/${date}`);
+                state.currentSlots = await res.json();
+                render();
+            } catch (e) {
+                alert('Ошибка загрузки расписания');
+            }
+        }
+
+        async function loadMyBookings() {
+            if (!userId) {
+                alert('Для просмотра записей необходимо открыть приложение через Telegram');
+                return;
+            }
+            try {
+                const res = await fetch(`${API_URL}/client_bookings/${userId}`);
+                const data = await res.json();
+                state.myBookings = Array.isArray(data) ? data : [];
+                state.currentView = 'myBookings';
+                render();
+            } catch (e) {
+                showError('Не удалось загрузить записи');
+            }
+        }
+
+        async function submitBooking(data) {
+            try {
+                const res = await fetch(`${API_URL}/book`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                return res.ok;
+            } catch {
+                return false;
+            }
+        }
+
+        async function cancelBooking(bookingId) {
+            if (!confirm('Отменить запись?')) return;
+            try {
+                const res = await fetch(`${API_URL}/cancel_booking/${bookingId}`, { method: 'POST' });
+                if (res.ok) {
+                    alert('Запись отменена');
+                    loadMyBookings();
+                }
+            } catch {
+                alert('Ошибка при отмене');
+            }
+        }
+
+        async function submitReview(trainerId, rating, text) {
+            if (!userId) return alert('Необходимо авторизоваться');
+            try {
+                const res = await fetch(`${API_URL}/reviews`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        trainer_id: trainerId,
+                        user_id: userId,
+                        user_name: tg.initDataUnsafe?.user?.first_name || 'Аноним',
+                        rating,
+                        text
+                    })
+                });
+                if (res.ok) {
+                    alert('Спасибо за отзыв!');
+                    loadTrainerProfile(trainerId);
+                }
+            } catch {
+                alert('Ошибка при отправке отзыва');
+            }
+        }
+
+        function shareTrainer() {
+            if (!state.selectedTrainer) return;
+            const link = `https://t.me/uniocrm_bot?start=trainer_${state.selectedTrainer.user_id}`;
+            if (navigator.share) {
+                navigator.share({
+                    title: state.selectedTrainer.name,
+                    text: `Запишись к ${state.selectedTrainer.name}`,
+                    url: link
+                });
+            } else {
+                navigator.clipboard.writeText(link);
+                alert('Ссылка скопирована');
+            }
+        }
+
+        function renderStars(rating) {
+            if (!rating || isNaN(rating)) return '☆☆☆☆☆';
+            const full = Math.floor(rating);
+            const half = rating - full >= 0.5 ? 1 : 0;
+            const empty = 5 - full - half;
+            return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+        }
+
+        function showError(msg) {
+            document.getElementById('app').innerHTML = `<div class="empty-state">${msg}</div>`;
+        }
+
+        // ---------- render control ----------
+        function render() {
+            const container = document.getElementById('app');
+            const shareBtn = document.getElementById('shareBtn');
+            const backBtn = document.getElementById('backBtn');
+
+            if (backBtn) {
+                if (state.currentView === 'trainers') {
+                    backBtn.classList.add('hidden');
+                } else {
+                    backBtn.classList.remove('hidden');
+                }
+            }
+
+            if (state.currentView === 'trainers') {
+                shareBtn.style.display = 'none';
+                renderTrainers(container);
+            } else if (state.currentView === 'trainerDetail') {
+                shareBtn.style.display = 'flex';
+                renderTrainerDetail(container);
+            } else if (state.currentView === 'dates') {
+                shareBtn.style.display = 'none';
+                renderDates(container);
+            } else if (state.currentView === 'booking') {
+                shareBtn.style.display = 'none';
+                renderBookingForm(container);
+            } else if (state.currentView === 'confirmation') {
+                shareBtn.style.display = 'none';
+                renderConfirmation(container);
+            } else if (state.currentView === 'myBookings') {
+                shareBtn.style.display = 'none';
+                renderMyBookings(container);
+            }
+        }
+
+        // ---------- concrete renderers ----------
+        function renderTrainers(container) {
+            let html = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2>UNIO</h2>
+                    <button class="my-bookings-btn" onclick="loadMyBookings()">МОИ ЗАПИСИ</button>
+                </div>
+                <div class="sub-header">специалисты</div>
+                <input type="text" class="search-input" placeholder="Поиск по имени или специализации" 
+                       value="${state.searchQuery}" oninput="state.searchQuery=this.value; loadTrainers(this.value)">
+            `;
+
+            if (state.trainers.length === 0) {
+                html += '<div class="loading">Ничего не найдено</div>';
+            } else {
+                state.trainers.forEach(t => {
+                    const avgRating = t.rating_avg ? t.rating_avg.toFixed(1) : '0.0';
+                    html += `
+                        <div class="card" onclick="loadTrainerProfile(${t.user_id})">
+                            <div class="trainer-row">
+                                <div class="trainer-avatar">
+                                    ${t.photo_url ? `<img src="${t.photo_url}" alt="avatar">` : '👤'}
+                                </div>
+                                <div class="trainer-info">
+                                    <div class="trainer-name">${t.name}</div>
+                                    <div class="trainer-specialty">${t.specialty || ''}</div>
+                                    <div class="trainer-rating">
+                                        ${renderStars(t.rating_avg)}
+                                        <span>${avgRating}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            container.innerHTML = html;
+        }
+
+        function renderTrainerDetail(container) {
+            const t = state.selectedTrainer;
+            if (!t) {
+                container.innerHTML = '<div class="loading">Загрузка...</div>';
+                return;
+            }
+            const avgRating = t.rating_avg ? t.rating_avg.toFixed(1) : '0.0';
+            const reviewCount = t.review_count || 0;
+
+            let reviewsHtml = '';
+            if (!Array.isArray(state.reviews) || state.reviews.length === 0) {
+                reviewsHtml = '<p>Пока нет отзывов</p>';
+            } else {
+                reviewsHtml = state.reviews.map(r => {
+                    const userName = r.user_name || 'Аноним';
+                    const date = r.created_at ? new Date(r.created_at).toLocaleDateString('ru-RU') : '';
+                    const rating = r.rating || 0;
+                    const text = r.text || '';
+                    return `
+                        <div class="review-item">
+                            <div class="review-header">
+                                <span class="review-author">${userName}</span>
+                                <span class="review-date">${date}</span>
+                            </div>
+                            <div class="review-rating">${renderStars(rating)}</div>
+                            <div class="review-text">${text}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Порядок: имя, специализация, отзывы, кнопка ЗАПИСАТЬСЯ, описание
+            let html = `
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        ${t.photo_url ? `<img src="${t.photo_url}" alt="avatar">` : '👤'}
+                    </div>
+                    <div class="profile-name">${t.name}</div>
+                    <div class="profile-specialty">${t.specialty || ''}</div>
+                    <div class="rating-summary">
+                        <span class="rating-average">${avgRating}</span>
+                        <span class="rating-stars">${renderStars(t.rating_avg)}</span>
+                        <span class="rating-count">(${reviewCount})</span>
+                    </div>
+                </div>
+
+                <div class="reviews-section">
+                    <h3>Отзывы</h3>
+                    ${reviewsHtml}
+                    <button class="btn-outline" onclick="showReviewForm()">Оставить отзыв</button>
+                </div>
+
+                <button class="book-btn-large" onclick="goToDates()">ЗАПИСАТЬСЯ</button>
+
+                <div class="profile-description">
+                    ${t.description || 'Пока нет описания.'}
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function renderDates(container) {
+            const t = state.selectedTrainer;
+            const today = new Date().toISOString().split('T')[0];
+            let html = `
+                <h2>${t.name}</h2>
+                <div class="calendar-container">
+                    <input type="date" id="datePicker" class="calendar-input" min="${today}" value="${state.selectedDate || ''}">
+                    <div id="timeSlots">
+                        ${renderTimeSlots()}
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+            document.getElementById('datePicker').addEventListener('change', function(e) {
+                state.selectedDate = e.target.value;
+                loadSchedule(t.user_id, state.selectedDate);
+            });
+        }
+
+        function renderTimeSlots() {
+            if (!state.selectedDate) return '<p class="info">Выберите дату</p>';
+            if (state.currentSlots.length === 0) return '<p class="info">Нет свободных слотов</p>';
+            return '<div class="time-slots">' + 
+                state.currentSlots.map(s => `<span class="time-slot" onclick="selectTime('${s.time}')">${s.time}</span>`).join('') +
+                '</div>';
+        }
+
+        function renderBookingForm(container) {
+            const t = state.selectedTrainer;
+            let html = `
+                <h2>Ваши данные</h2>
+                <p><strong>Тренер:</strong> ${t.name}</p>
+                <p><strong>Дата:</strong> ${formatDate(state.selectedDate)}</p>
+                <p><strong>Время:</strong> ${state.selectedTime}</p>
+                <div class="form-group">
+                    <label>Имя</label>
+                    <input type="text" id="clientName" placeholder="Иван Петров" value="${state.clientName}">
+                </div>
+                <div class="form-group">
+                    <label>Телефон</label>
+                    <input type="tel" id="clientPhone" placeholder="+7 (999) 123-45-67" value="${state.clientPhone}">
+                </div>
+                <button class="btn" onclick="confirmBooking()">Записаться</button>
+            `;
+            container.innerHTML = html;
+        }
+
+        function renderConfirmation(container) {
+            const t = state.selectedTrainer;
+            let html = `
+                <div class="booking-confirmation">
+                    <div class="confirmation-icon">✅</div>
+                    <h2>Вы записаны!</h2>
+                    <p><strong>Тренер:</strong> ${t.name}</p>
+                    <p><strong>Дата:</strong> ${formatDate(state.selectedDate)}</p>
+                    <p><strong>Время:</strong> ${state.selectedTime}</p>
+                    <button class="btn" onclick="startOver()" style="margin-top: 2rem;">Записаться ещё</button>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function renderMyBookings(container) {
+            let html = `
+                <h2>Мои записи</h2>
+            `;
+            if (state.myBookings.length === 0) {
+                html += '<div class="empty-state">У вас пока нет записей</div>';
+            } else {
+                state.myBookings.forEach(b => {
+                    const isFuture = new Date(b.booking_date + 'T' + b.booking_time) > new Date();
+                    html += `
+                        <div class="booking-item ${b.status === 'cancelled' ? 'cancelled' : ''}">
+                            <div class="booking-header">
+                                <span class="booking-trainer">${b.name}</span>
+                                <span class="booking-status">${b.status === 'active' ? 'активна' : 'отменена'}</span>
+                            </div>
+                            <div class="booking-datetime">
+                                ${formatDate(b.booking_date)} в ${b.booking_time}
+                            </div>
+                            ${b.status === 'active' && isFuture ? 
+                                `<button class="cancel-btn" onclick="cancelBooking(${b.id})">Отменить</button>` : ''}
+                        </div>
+                    `;
+                });
+            }
+            container.innerHTML = html;
+        }
+
+        // ---------- navigation ----------
+        function goBack() {
+            if (state.currentView === 'trainerDetail') state.currentView = 'trainers';
+            else if (state.currentView === 'dates') state.currentView = 'trainerDetail';
+            else if (state.currentView === 'booking') state.currentView = 'dates';
+            else if (state.currentView === 'myBookings') state.currentView = 'trainers';
+            render();
+        }
+
+        function goToDates() {
+            state.currentView = 'dates';
+            state.selectedDate = '';
+            state.currentSlots = [];
+            render();
+        }
+
+        function selectTime(time) {
+            state.selectedTime = time;
+            state.currentView = 'booking';
+            render();
+        }
+
+        async function confirmBooking() {
+            const name = document.getElementById('clientName')?.value.trim();
+            const phone = document.getElementById('clientPhone')?.value.trim();
+            if (!name || !phone) {
+                alert('Заполните все поля');
+                return;
+            }
+            state.clientName = name;
+            state.clientPhone = phone;
+            const ok = await submitBooking({
+                trainer_id: state.selectedTrainer.user_id,
+                date: state.selectedDate,
+                time: state.selectedTime,
+                client_name: name,
+                client_phone: phone,
+                telegram_id: userId
+            });
+            if (ok) {
+                state.currentView = 'confirmation';
+                render();
+            } else {
+                alert('Ошибка при записи');
+            }
+        }
+
+        function startOver() {
+            state.currentView = 'trainers';
+            state.selectedTrainer = null;
+            state.selectedDate = '';
+            state.selectedTime = '';
+            state.clientName = '';
+            state.clientPhone = '';
+            state.currentSlots = [];
+            loadTrainers();
+        }
+
+        function showReviewForm() {
+            const rating = prompt('Оцените тренера от 1 до 5', '5');
+            if (!rating) return;
+            const text = prompt('Напишите отзыв (необязательно)', '');
+            submitReview(state.selectedTrainer.user_id, parseInt(rating), text || '');
+        }
+
+        // ---------- deep link ----------
+        function handleStartParam() {
+            const startParam = tg.initDataUnsafe?.start_param;
+            if (startParam && startParam.startsWith('trainer_')) {
+                const trainerId = parseInt(startParam.split('_')[1]);
+                loadTrainerProfile(trainerId);
+            } else {
+                loadTrainers();
+            }
+        }
+
+        handleStartParam();
+    </script>
+</body>
+</html>
